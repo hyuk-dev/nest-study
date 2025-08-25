@@ -1,0 +1,44 @@
+name: NestJS CI
+
+on:
+  push:
+    branches: [ main ]  # main 브랜치에 코드가 푸시될 때 실행
+  pull_request:
+    branches: [ main ]  # main 브랜치로 PR이 들어올 때 실행
+
+# jobs는 워크플로우에서 수행할 작업들을 정의
+jobs:
+  test:
+    # 이 job이 실행될 환경
+    runs-on: ubuntu-latest
+
+    # 여러 Node 버전에서 테스트하고 싶을 때 matrix 사용
+    strategy:
+      matrix:
+        node-version: [18.x] # Node 18버전에서 실행
+
+    steps:
+      # 저장소 코드 체크아웃
+      - uses: actions/checkout@v3
+        # actions/checkout은 Github 저장소를 runner에 복제하는 역할
+      
+      # Node.js 설치
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+        # matrix.node-version으로 위에서 정의한 Node 버전 설치
+
+      # 의존성 설치
+      - name: Install dependencies
+        run: npm install
+        # package.json 기반으로 프로젝트 의존성 설치
+
+      # 코드 스타일 확인 (Lint)
+      - name: Lint code
+        run: npm run lint
+        # tslint 또는 eslint 기반 lint 실행, 코드 스타일 확인
+
+      # 테스트 실행
+      - name: Run tests
+        run: npm run test
